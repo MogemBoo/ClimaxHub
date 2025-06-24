@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./Home.css"; // import the CSS file
 
 const HomePage = () => {
   const [topMovies, setTopMovies] = useState([]);
@@ -8,7 +9,7 @@ const HomePage = () => {
 
   // Fetch top rated movies
   useEffect(() => {
-    fetch("http://localhost:5000/api/movies/top-rated")
+    fetch("http://localhost:5000/api/movies/top")
       .then((res) => res.json())
       .then((data) => setTopMovies(data))
       .catch((err) => console.error("Error fetching top movies:", err));
@@ -32,58 +33,60 @@ const HomePage = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">🎬 ClimaxHub - IMDb Clone</h1>
+    <div className="homepage-container">
+      <h1 className="homepage-title">🎬 ClimaxHub - IMDb Clone</h1>
 
       {/* Search Box */}
-      <form onSubmit={handleSearch} className="mb-6">
+      <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
           placeholder="Search movies..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border px-4 py-2 rounded w-64 mr-2"
+          className="search-input"
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+        <button type="submit" className="search-button">
           Search
         </button>
       </form>
 
       {/* Search Results */}
       {searchResults.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Search Results</h2>
-          <MovieGrid movies={searchResults} />
+        <div className="section">
+          <h2 className="section-title">Search Results</h2>
+          <MovieList movies={searchResults} />
         </div>
       )}
 
       {/* Top Rated Movies */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-2">⭐ Top Rated Movies</h2>
-        <MovieGrid movies={topMovies} />
+      <div className="section">
+        <h2 className="section-title">⭐ Top Rated Movies</h2>
+        <MovieList movies={topMovies} />
       </div>
 
       {/* Recently Released Movies */}
-      <div>
-        <h2 className="text-2xl font-semibold mb-2">🆕 Recently Released Movies</h2>
-        <MovieGrid movies={recentMovies} />
+      <div className="section">
+        <h2 className="section-title">🆕 Recently Released Movies</h2>
+        <MovieList movies={recentMovies} />
       </div>
     </div>
   );
 };
 
-const MovieGrid = ({ movies }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+const MovieList = ({ movies }) => (
+  <div className="movie-horizontal-scroll">
     {movies.map((movie) => (
-      <div key={movie.movie_id} className="border rounded shadow p-2">
+      <div key={movie.movie_id} className="movie-scroll-card">
         <img
           src={movie.poster_url}
           alt={movie.title}
-          className="w-full h-64 object-cover mb-2"
+          className="movie-scroll-poster"
         />
-        <h3 className="font-bold text-lg">{movie.title}</h3>
-        <p>Rating: ⭐ {movie.rating}</p>
-        <p>Released: {movie.release_date}</p>
+        <div>
+          <h3 className="movie-title">{movie.title}</h3>
+          <p className="movie-info">Rating: ⭐ {movie.rating}</p>
+          <p className="movie-info">Released: {movie.release_date}</p>
+        </div>
       </div>
     ))}
   </div>
