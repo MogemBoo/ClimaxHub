@@ -1,5 +1,6 @@
 import pool from '../db.js';
 
+//add movie
 export async function addFullMovie(req, res) {
   const {
     title, release_date, duration, description,
@@ -82,5 +83,61 @@ export async function addFullMovie(req, res) {
     res.status(500).json({ error: 'Failed to insert movie data' });
   } finally {
     client.release();
+  }
+}
+
+//fetch top 20 movies
+export async function getTopRatedMovies(req, res) {
+  try {
+    const result = await pool.query(`
+      SELECT movie_id, title, rating, vote_count, poster_url
+      FROM movie
+      WHERE rating IS NOT NULL
+      ORDER BY rating DESC, vote_count DESC
+      LIMIT 20
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ Error fetching top-rated movies:', error);
+    res.status(500).json({ error: 'Failed to fetch top-rated movies' });
+  }
+}
+
+// Search movies by title
+export async function searchMovies(req, res) {
+  const { query } = req.query;
+  if (!query) return res.status(400).json({ error: 'Search query is required' });
+
+  try {
+    const result = await pool.query(`
+      SELECT movie_id, title, rating, release_date, poster_url
+      FROM movie
+      WHERE LOWER(title) LIKE LOWER($1)
+      ORDER BY release_date DESC
+      LIMIT 20
+    `, [`%${query}%`]);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ Error searching movies:', error);
+    res.status(500).json({ error: 'Failed to search movies' });
+  }
+}
+
+// Get recently released movies
+export async function getRecentMovies(req, res) {
+  try {
+    const result = await pool.query(`
+      SELECT movie_id, title, release_date, rating, poster_url
+      FROM movie
+      ORDER BY release_date DESC
+      LIMIT 20
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ Error fetching recent movies:', error);
+    res.status(500).json({ error: 'Failed to fetch recent movies' });
   }
 }

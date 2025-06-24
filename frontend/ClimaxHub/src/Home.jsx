@@ -8,7 +8,7 @@ const HomePage = () => {
 
   // Fetch top rated movies
   useEffect(() => {
-    fetch("http://localhost:5000/api/movies/top")
+    fetch("http://localhost:5000/api/movies/top-rated")
       .then((res) => res.json())
       .then((data) => setTopMovies(data))
       .catch((err) => console.error("Error fetching top movies:", err));
