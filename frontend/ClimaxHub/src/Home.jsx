@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./Home.css"; // import the CSS file
 
 const HomePage = () => {
@@ -7,7 +7,9 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  // Fetch top rated movies
+  const topScrollRef = useRef(null);
+  const recentScrollRef = useRef(null);
+
   useEffect(() => {
     fetch("http://localhost:5000/api/movies/top")
       .then((res) => res.json())
@@ -15,7 +17,6 @@ const HomePage = () => {
       .catch((err) => console.error("Error fetching top movies:", err));
   }, []);
 
-  // Fetch recently released movies
   useEffect(() => {
     fetch("http://localhost:5000/api/movies/recent")
       .then((res) => res.json())
@@ -23,7 +24,6 @@ const HomePage = () => {
       .catch((err) => console.error("Error fetching recent movies:", err));
   }, []);
 
-  // Handle search
   const handleSearch = (e) => {
     e.preventDefault();
     fetch(`http://localhost:5000/api/movies/search?query=${searchQuery}`)
@@ -32,11 +32,19 @@ const HomePage = () => {
       .catch((err) => console.error("Error searching movies:", err));
   };
 
+  const scroll = (ref, direction) => {
+    if (!ref.current) return;
+    const scrollAmount = 300;
+    ref.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="homepage-container">
       <h1 className="homepage-title">🎬 ClimaxHub - IMDb Clone</h1>
 
-      {/* Search Box */}
       <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
@@ -50,7 +58,6 @@ const HomePage = () => {
         </button>
       </form>
 
-      {/* Search Results */}
       {searchResults.length > 0 && (
         <div className="section">
           <h2 className="section-title">Search Results</h2>
@@ -58,23 +65,29 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* Top Rated Movies */}
       <div className="section">
         <h2 className="section-title">⭐ Top Rated Movies</h2>
-        <MovieList movies={topMovies} />
+        <div className="scroll-container">
+          <button className="scroll-arrow left" onClick={() => scroll(topScrollRef, "left")}>←</button>
+          <MovieList movies={topMovies} scrollRef={topScrollRef} />
+          <button className="scroll-arrow right" onClick={() => scroll(topScrollRef, "right")}>→</button>
+        </div>
       </div>
 
-      {/* Recently Released Movies */}
       <div className="section">
         <h2 className="section-title">🆕 Recently Released Movies</h2>
-        <MovieList movies={recentMovies} />
+        <div className="scroll-container">
+          <button className="scroll-arrow left" onClick={() => scroll(recentScrollRef, "left")}>←</button>
+          <MovieList movies={recentMovies} scrollRef={recentScrollRef} />
+          <button className="scroll-arrow right" onClick={() => scroll(recentScrollRef, "right")}>→</button>
+        </div>
       </div>
     </div>
   );
 };
 
-const MovieList = ({ movies }) => (
-  <div className="movie-horizontal-scroll">
+const MovieList = ({ movies, scrollRef }) => (
+  <div className="movie-horizontal-scroll" ref={scrollRef}>
     {movies.map((movie) => (
       <div key={movie.movie_id} className="movie-scroll-card">
         <img
