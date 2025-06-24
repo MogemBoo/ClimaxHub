@@ -90,7 +90,7 @@ export async function addFullMovie(req, res) {
 export async function getTopRatedMovies(req, res) {
   try {
     const result = await pool.query(`
-      SELECT movie_id, title, rating, vote_count, poster_url
+      SELECT movie_id, title, rating, vote_count, poster_url, description
       FROM movie
       WHERE rating IS NOT NULL
       ORDER BY rating DESC, vote_count DESC
@@ -139,5 +139,21 @@ export async function getRecentMovies(req, res) {
   } catch (error) {
     console.error('❌ Error fetching recent movies:', error);
     res.status(500).json({ error: 'Failed to fetch recent movies' });
+  }
+}
+
+// Get all movies
+export async function getAllMovies(req, res) {
+  try {
+    const result = await pool.query(`
+      SELECT movie_id, title, release_date, rating, poster_url
+      FROM movie
+      ORDER BY title DESC
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ Error fetching all movies:', error);
+    res.status(500).json({ error: 'Failed to fetch all movies' });
   }
 }
