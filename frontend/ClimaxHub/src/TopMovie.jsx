@@ -13,7 +13,7 @@ const TopMovies = () => {
 
   return (
     <div className="topmovies-container">
-      <h1 className="topmovies-title">⭐ Top Rated Movies</h1>
+      <h1 className="topmovies-title"> Top Rated Movies</h1>
       <div className="topmovies-list">
         {movies.map((movie) => (
           <div key={movie.movie_id} className="topmovie-item">
@@ -23,7 +23,7 @@ const TopMovies = () => {
                 alt={movie.title}
                 className="topmovie-poster"
               />
-              <div className="topmovie-rating">⭐ {movie.rating}</div>
+              <div className="topmovie-rating"> {movie.rating}</div>
             </div>
             <div className="topmovie-description">
               <h2 className="topmovie-title">{movie.title}</h2>

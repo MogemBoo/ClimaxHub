@@ -1,14 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
-import "./Home.css"; // import the CSS file
+import { useNavigate } from "react-router-dom";
+import "./Home.css"; 
 
 const HomePage = () => {
+  const navigate = useNavigate(); 
   const [topMovies, setTopMovies] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
+  const [recentSeries, setRecentSeries] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
   const topScrollRef = useRef(null);
-  const recentScrollRef = useRef(null);
+  const recentMovieScrollRef = useRef(null);
+  const recentSeriesScrollRef = useRef(null);  
 
   useEffect(() => {
     fetch("http://localhost:5000/api/movies/top")
@@ -22,6 +26,13 @@ const HomePage = () => {
       .then((res) => res.json())
       .then((data) => setRecentMovies(data))
       .catch((err) => console.error("Error fetching recent movies:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/series/recent")  
+      .then((res) => res.json())
+      .then((data) => setRecentSeries(data))
+      .catch((err) => console.error("Error fetching recent series:", err));
   }, []);
 
   const handleSearch = (e) => {
@@ -43,7 +54,14 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
-      <h1 className="homepage-title">🎬 ClimaxHub - IMDb Clone</h1>
+      <button
+        className="top-movies-btn"
+        onClick={() => navigate("/top-movies")}
+        aria-label="Go to Top Movies page"
+      >
+        Top Movies
+      </button>
+      <h1 className="homepage-title">Welcome to ClimaxHub</h1>
 
       <form onSubmit={handleSearch} className="search-form">
         <input
@@ -66,20 +84,60 @@ const HomePage = () => {
       )}
 
       <div className="section">
-        <h2 className="section-title">⭐ Top Rated Movies</h2>
+        <h2 className="section-title"> Top Rated Movies</h2>
         <div className="scroll-container">
-          <button className="scroll-arrow left" onClick={() => scroll(topScrollRef, "left")}>←</button>
+          <button
+            className="scroll-arrow left"
+            onClick={() => scroll(topScrollRef, "left")}
+          >
+            ←
+          </button>
           <MovieList movies={topMovies} scrollRef={topScrollRef} />
-          <button className="scroll-arrow right" onClick={() => scroll(topScrollRef, "right")}>→</button>
+          <button
+            className="scroll-arrow right"
+            onClick={() => scroll(topScrollRef, "right")}
+          >
+            →
+          </button>
         </div>
       </div>
 
       <div className="section">
-        <h2 className="section-title">🆕 Recently Released Movies</h2>
+        <h2 className="section-title"> Recently Released Movies</h2>
         <div className="scroll-container">
-          <button className="scroll-arrow left" onClick={() => scroll(recentScrollRef, "left")}>←</button>
-          <MovieList movies={recentMovies} scrollRef={recentScrollRef} />
-          <button className="scroll-arrow right" onClick={() => scroll(recentScrollRef, "right")}>→</button>
+          <button
+            className="scroll-arrow left"
+            onClick={() => scroll(recentMovieScrollRef, "left")}
+          >
+            ←
+          </button>
+          <MovieList movies={recentMovies} scrollRef={recentMovieScrollRef} />
+          <button
+            className="scroll-arrow right"
+            onClick={() => scroll(recentMovieScrollRef, "right")}
+          >
+            →
+          </button>
+        </div>
+      </div>
+
+
+      <div className="section">
+        <h2 className="section-title"> Recently Released Series</h2>
+        <div className="scroll-container">
+          <button
+            className="scroll-arrow left"
+            onClick={() => scroll(recentSeriesScrollRef, "left")}
+          >
+            ←
+          </button>
+          <SeriesList series={recentSeries} scrollRef={recentSeriesScrollRef} />
+          <button
+            className="scroll-arrow right"
+            onClick={() => scroll(recentSeriesScrollRef, "right")}
+          >
+            →
+          </button>
         </div>
       </div>
     </div>
@@ -97,8 +155,27 @@ const MovieList = ({ movies, scrollRef }) => (
         />
         <div>
           <h3 className="movie-title">{movie.title}</h3>
-          <p className="movie-info">Rating: ⭐ {movie.rating}</p>
+          <p className="movie-info">Rating:  {movie.rating}</p>
           <p className="movie-info">Released: {movie.release_date}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+const SeriesList = ({ series, scrollRef }) => (
+  <div className="movie-horizontal-scroll" ref={scrollRef}>
+    {series.map((s) => (
+      <div key={s.series_id} className="movie-scroll-card">
+        <img
+          src={s.poster_url}
+          alt={s.title}
+          className="movie-scroll-poster"
+        />
+        <div>
+          <h3 className="movie-title">{s.title}</h3>
+          <p className="movie-info">Rating:  {s.rating}</p>
+          <p className="movie-info">Start Date: {s.start_date}</p>
         </div>
       </div>
     ))}

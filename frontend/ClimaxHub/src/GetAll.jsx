@@ -13,7 +13,7 @@ const GetAll = () => {
 
   return (
     <div className="getall-container">
-      <h1 className="getall-title">🎬 All Movies</h1>
+      <h1 className="getall-title"> All Movies</h1>
       <div className="movie-grid">
         {movies.map((movie) => (
           <div key={movie.movie_id} className="movie-card">
@@ -23,7 +23,7 @@ const GetAll = () => {
               className="movie-poster"
             />
             <h3 className="movie-title">{movie.title}</h3>
-            <p className="movie-info">Rating: ⭐ {movie.rating}</p>
+            <p className="movie-info">Rating:  {movie.rating}</p>
             <p className="movie-info">Released: {movie.release_date}</p>
           </div>
         ))}

@@ -79,7 +79,7 @@ export async function addFullMovie(req, res) {
     res.status(201).json({ message: 'Movie, cast, crew, and genres added!', movie_id: movieId });
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('❌ Insert error:', err);
+    console.error(' Insert error:', err);
     res.status(500).json({ error: 'Failed to insert movie data' });
   } finally {
     client.release();
@@ -99,7 +99,7 @@ export async function getTopRatedMovies(req, res) {
 
     res.json(result.rows);
   } catch (error) {
-    console.error('❌ Error fetching top-rated movies:', error);
+    console.error(' Error fetching top-rated movies:', error);
     res.status(500).json({ error: 'Failed to fetch top-rated movies' });
   }
 }
@@ -120,7 +120,7 @@ export async function searchMovies(req, res) {
 
     res.json(result.rows);
   } catch (error) {
-    console.error('❌ Error searching movies:', error);
+    console.error(' Error searching movies:', error);
     res.status(500).json({ error: 'Failed to search movies' });
   }
 }
@@ -137,7 +137,7 @@ export async function getRecentMovies(req, res) {
 
     res.json(result.rows);
   } catch (error) {
-    console.error('❌ Error fetching recent movies:', error);
+    console.error(' Error fetching recent movies:', error);
     res.status(500).json({ error: 'Failed to fetch recent movies' });
   }
 }
@@ -146,14 +146,14 @@ export async function getRecentMovies(req, res) {
 export async function getAllMovies(req, res) {
   try {
     const result = await pool.query(`
-      SELECT movie_id, title, release_date, rating, poster_url
+      SELECT movie_id, title, release_date, rating, poster_url, description
       FROM movie
       ORDER BY title DESC
     `);
 
     res.json(result.rows);
   } catch (error) {
-    console.error('❌ Error fetching all movies:', error);
+    console.error(' Error fetching all movies:', error);
     res.status(500).json({ error: 'Failed to fetch all movies' });
   }
 }

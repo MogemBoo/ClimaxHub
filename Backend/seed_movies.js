@@ -120,10 +120,10 @@ async function seedMovies() {
       }
 
       await client.query('COMMIT');
-      console.log(`✅ Inserted movie: ${movie.title}`);
+      console.log(` Inserted movie: ${movie.title}`);
     } catch (err) {
       await client.query('ROLLBACK');
-      console.error(`❌ Failed to insert ${movie.title}:`, err);
+      console.error(` Failed to insert ${movie.title}:`, err);
     } finally {
       client.release();
     }

@@ -1,3 +1,23 @@
+.top-movies-btn {
+  position: fixed; /* instead of absolute */
+  top: 1rem;
+  right: 1rem;
+  background-color: #f1c40f;
+  color: #111;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000; /* high enough to stay above all */
+  transition: background-color 0.3s ease;
+}
+
+.top-movies-btn:hover {
+  background-color: #d4ac0d;
+}
+
+
 .homepage-container {
   padding: 2rem;
   font-family: Arial, sans-serif;
