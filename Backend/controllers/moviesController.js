@@ -86,6 +86,55 @@ export async function addFullMovie(req, res) {
   }
 }
 
+//fetch by id
+export async function getMovieById(req, res) {
+  const movieId = req.params.id;
+
+  try {
+    const movieResult = await pool.query(`
+      SELECT movie_id, title, release_date, duration, description, rating, vote_count, poster_url, trailer_url
+      FROM movie
+      WHERE movie_id = $1
+    `, [movieId]);
+
+    if (movieResult.rowCount === 0) {
+      return res.status(404).json({ error: 'Movie not found' });
+    }
+
+    const movie = movieResult.rows[0];
+
+    const genresResult = await pool.query(`
+      SELECT g.name FROM genre g
+      JOIN movie_genre mg ON g.genre_id = mg.genre_id
+      WHERE mg.movie_id = $1
+    `, [movieId]);
+
+    const castResult = await pool.query(`
+      SELECT p.person_id, p.name, p.birthdate, p.bio, p.profile_img_url, p.popularity, mc.character_name
+      FROM person p
+      JOIN movie_cast mc ON p.person_id = mc.person_id
+      WHERE mc.movie_id = $1
+    `, [movieId]);
+
+    const crewResult = await pool.query(`
+      SELECT p.person_id, p.name, p.birthdate, p.bio, p.profile_img_url, p.popularity, mc.role
+      FROM person p
+      JOIN movie_crew mc ON p.person_id = mc.person_id
+      WHERE mc.movie_id = $1
+    `, [movieId]);
+
+    res.json({
+      ...movie,
+      genres: genresResult.rows.map(g => g.name),
+      cast: castResult.rows,
+      crew: crewResult.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching movie by ID:', error);
+    res.status(500).json({ error: 'Failed to fetch movie details' });
+  }
+}
+
 //fetch top 20 movies
 export async function getTopRatedMovies(req, res) {
   try {

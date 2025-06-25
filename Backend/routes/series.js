@@ -4,7 +4,8 @@ import {
     getAllSeries,
     getRecentSeries,
     getTopRatedSeries,
-    searchSeries
+    searchSeries,
+    getSeriesById
 
 } from '../controllers/seriesController.js';
 
@@ -15,5 +16,6 @@ router.get('/top', getTopRatedSeries);
 router.get('/recent', getRecentSeries);
 router.get('/search', searchSeries);
 router.get('/all', getAllSeries);
+router.get('/:id', getSeriesById);
 
 export default router;

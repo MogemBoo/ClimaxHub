@@ -52,6 +52,10 @@ const HomePage = () => {
     });
   };
 
+  const handleCardClick = (type, id) => {
+    navigate(`/details/${type}/${id}`);
+  };
+
   return (
     <div className="homepage-container">
       <button
@@ -79,7 +83,7 @@ const HomePage = () => {
       {searchResults.length > 0 && (
         <div className="section">
           <h2 className="section-title">Search Results</h2>
-          <MovieList movies={searchResults} />
+          <MovieList movies={searchResults} onCardClick={handleCardClick} />
         </div>
       )}
 
@@ -92,7 +96,7 @@ const HomePage = () => {
           >
             ←
           </button>
-          <MovieList movies={topMovies} scrollRef={topScrollRef} />
+          <MovieList movies={topMovies} scrollRef={topScrollRef} onCardClick={handleCardClick} />
           <button
             className="scroll-arrow right"
             onClick={() => scroll(topScrollRef, "right")}
@@ -111,7 +115,7 @@ const HomePage = () => {
           >
             ←
           </button>
-          <MovieList movies={recentMovies} scrollRef={recentMovieScrollRef} />
+          <MovieList movies={recentMovies} scrollRef={recentMovieScrollRef} onCardClick={handleCardClick} />
           <button
             className="scroll-arrow right"
             onClick={() => scroll(recentMovieScrollRef, "right")}
@@ -120,7 +124,6 @@ const HomePage = () => {
           </button>
         </div>
       </div>
-
 
       <div className="section">
         <h2 className="section-title"> Recently Released Series</h2>
@@ -131,7 +134,7 @@ const HomePage = () => {
           >
             ←
           </button>
-          <SeriesList series={recentSeries} scrollRef={recentSeriesScrollRef} />
+          <SeriesList series={recentSeries} scrollRef={recentSeriesScrollRef} onCardClick={handleCardClick} />
           <button
             className="scroll-arrow right"
             onClick={() => scroll(recentSeriesScrollRef, "right")}
@@ -144,10 +147,15 @@ const HomePage = () => {
   );
 };
 
-const MovieList = ({ movies, scrollRef }) => (
+const MovieList = ({ movies, scrollRef, onCardClick }) => (
   <div className="movie-horizontal-scroll" ref={scrollRef}>
     {movies.map((movie) => (
-      <div key={movie.movie_id} className="movie-scroll-card">
+      <div
+        key={movie.movie_id}
+        className="movie-scroll-card"
+        onClick={() => onCardClick("movies", movie.movie_id)}
+        style={{ cursor: "pointer" }}
+      >
         <img
           src={movie.poster_url}
           alt={movie.title}
@@ -155,7 +163,7 @@ const MovieList = ({ movies, scrollRef }) => (
         />
         <div>
           <h3 className="movie-title">{movie.title}</h3>
-          <p className="movie-info">Rating:  {movie.rating}</p>
+          <p className="movie-info">Rating: {movie.rating}</p>
           <p className="movie-info">Released: {movie.release_date}</p>
         </div>
       </div>
@@ -163,10 +171,15 @@ const MovieList = ({ movies, scrollRef }) => (
   </div>
 );
 
-const SeriesList = ({ series, scrollRef }) => (
+const SeriesList = ({ series, scrollRef, onCardClick }) => (
   <div className="movie-horizontal-scroll" ref={scrollRef}>
     {series.map((s) => (
-      <div key={s.series_id} className="movie-scroll-card">
+      <div
+        key={s.series_id}
+        className="movie-scroll-card"
+        onClick={() => onCardClick("series", s.series_id)}
+        style={{ cursor: "pointer" }}
+      >
         <img
           src={s.poster_url}
           alt={s.title}
@@ -174,7 +187,7 @@ const SeriesList = ({ series, scrollRef }) => (
         />
         <div>
           <h3 className="movie-title">{s.title}</h3>
-          <p className="movie-info">Rating:  {s.rating}</p>
+          <p className="movie-info">Rating: {s.rating}</p>
           <p className="movie-info">Start Date: {s.start_date}</p>
         </div>
       </div>

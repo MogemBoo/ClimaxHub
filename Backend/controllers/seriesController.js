@@ -103,6 +103,73 @@ export async function addFullSeries(req, res) {
   }
 }
 
+export async function getSeriesById(req, res) {
+  const seriesId = req.params.id;
+
+  try {
+    const seriesResult = await pool.query(`
+      SELECT series_id, title, start_date, end_date, description, rating, vote_count, poster_url, trailer_url
+      FROM series
+      WHERE series_id = $1
+    `, [seriesId]);
+
+    if (seriesResult.rowCount === 0) {
+      return res.status(404).json({ error: 'Series not found' });
+    }
+
+    const series = seriesResult.rows[0];
+
+    const genresResult = await pool.query(`
+      SELECT g.name FROM genre g
+      JOIN series_genre sg ON g.genre_id = sg.genre_id
+      WHERE sg.series_id = $1
+    `, [seriesId]);
+
+    const castResult = await pool.query(`
+      SELECT p.person_id, p.name, p.birthdate, p.bio, p.profile_img_url, p.popularity, sc.character_name
+      FROM person p
+      JOIN series_cast sc ON p.person_id = sc.person_id
+      WHERE sc.series_id = $1
+    `, [seriesId]);
+
+    const crewResult = await pool.query(`
+      SELECT p.person_id, p.name, p.birthdate, p.bio, p.profile_img_url, p.popularity, sc.role
+      FROM person p
+      JOIN series_crew sc ON p.person_id = sc.person_id
+      WHERE sc.series_id = $1
+    `, [seriesId]);
+
+    const seasonsResult = await pool.query(`
+      SELECT season_id, season_number, release_date, description, trailer_url
+      FROM season
+      WHERE series_id = $1
+      ORDER BY season_number
+    `, [seriesId]);
+
+    for (const season of seasonsResult.rows) {
+      const episodesResult = await pool.query(`
+        SELECT episode_id, episode_number, title, air_date, duration, description
+        FROM episode
+        WHERE season_id = $1
+        ORDER BY episode_number
+      `, [season.season_id]);
+
+      season.episodes = episodesResult.rows;
+    }
+
+    res.json({
+      ...series,
+      genres: genresResult.rows.map(g => g.name),
+      cast: castResult.rows,
+      crew: crewResult.rows,
+      seasons: seasonsResult.rows,
+    });
+  } catch (error) {
+    console.error('Error fetching series by ID:', error);
+    res.status(500).json({ error: 'Failed to fetch series details' });
+  }
+}
+
 
 //top rated
 export async function getTopRatedSeries(req, res) {

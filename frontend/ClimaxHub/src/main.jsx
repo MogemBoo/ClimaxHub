@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Details from "./Details";
 
 import './index.css';
 import HomePage from './Home.jsx';
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<HomePage />} />
         <Route path="/top-movies" element={<TopMovies />} />
         <Route path="/get-all" element={<GetAll />} />
+        <Route path="/details/:type/:id" element={<Details />} />
       </Routes>
     </Router>
   </StrictMode>
