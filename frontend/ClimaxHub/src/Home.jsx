@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Home.css"; 
+import "./Home.css";
+
+let debounceTimer = null;
 
 const HomePage = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [topMovies, setTopMovies] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
   const [recentSeries, setRecentSeries] = useState([]);
@@ -12,7 +14,7 @@ const HomePage = () => {
 
   const topScrollRef = useRef(null);
   const recentMovieScrollRef = useRef(null);
-  const recentSeriesScrollRef = useRef(null);  
+  const recentSeriesScrollRef = useRef(null);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/movies/top")
@@ -29,11 +31,31 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/series/recent")  
+    fetch("http://localhost:5000/api/series/recent")
       .then((res) => res.json())
       .then((data) => setRecentSeries(data))
       .catch((err) => console.error("Error fetching recent series:", err));
   }, []);
+
+  useEffect(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+
+    if (searchQuery.trim() === "") {
+      setSearchResults([]);
+      return;
+    }
+
+    debounceTimer = setTimeout(() => {
+      fetch(`http://localhost:5000/api/movies/search?query=${searchQuery}`)
+        .then((res) => res.json())
+        .then((data) => setSearchResults(data))
+        .catch((err) => {
+          console.error("Error searching:", err);
+          setSearchResults([]);
+        });
+    }, 400); // Debounce delay of 400ms
+  }, [searchQuery]);
+
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -58,19 +80,12 @@ const HomePage = () => {
 
   return (
     <div className="homepage-container">
-      <button
-        className="top-movies-btn"
-        onClick={() => navigate("/top-movies")}
-        aria-label="Go to Top Movies page"
-      >
-        Top Movies
-      </button>
       <h1 className="homepage-title">Welcome to ClimaxHub</h1>
 
       <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
-          placeholder="Search movies..."
+          placeholder="Search Movies and Series..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
@@ -78,14 +93,30 @@ const HomePage = () => {
         <button type="submit" className="search-button">
           Search
         </button>
+        <button
+          type="button"
+          className="top-movies-btn"
+          onClick={() => navigate("/top-movies")}
+          aria-label="Go to Top Movies page"
+        >
+          Top Movies
+        </button>
+        <button type = "button" className = "login-btn" onClick={() => navigate("/login")} aria-label="Go to Login page">
+          Login
+          </button>
       </form>
 
-      {searchResults.length > 0 && (
+      {searchQuery.trim() !== "" && (
         <div className="section">
           <h2 className="section-title">Search Results</h2>
-          <MovieList movies={searchResults} onCardClick={handleCardClick} />
+          {searchResults.length > 0 ? (
+            <MovieList movies={searchResults} onCardClick={handleCardClick} />
+          ) : (
+            <p style={{ color: "#bbb", marginTop: "1rem" }}>No results found.</p>
+          )}
         </div>
       )}
+
 
       <div className="section">
         <h2 className="section-title"> Top Rated Movies</h2>

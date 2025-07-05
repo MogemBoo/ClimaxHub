@@ -7,6 +7,7 @@ import './index.css';
 import HomePage from './Home.jsx';
 import TopMovies from './TopMovie.jsx';
 import GetAll from './GetAll.jsx';
+import Login from './Login.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -16,6 +17,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/top-movies" element={<TopMovies />} />
         <Route path="/get-all" element={<GetAll />} />
         <Route path="/details/:type/:id" element={<Details />} />
+        <Route path="/login" element={<Login />} />
+
       </Routes>
     </Router>
   </StrictMode>
