@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import pool from './db.js';
 import moviesRoutes from './routes/movies.js';
 import seriesRoutes from './routes/series.js';
+import loginRoutes from './routes/login.js';
+import signupRoutes from './routes/signup.js';
 import cors from 'cors';
 
 
@@ -11,13 +13,13 @@ dotenv.config();
 
 const app = express();
 
-
 app.use(cors());
-
 app.use(express.json());
 
 app.use('/api/movies', moviesRoutes); 
 app.use('/api/series', seriesRoutes);
+app.use('/api/login', loginRoutes);
+app.use('/api/signup', signupRoutes);
 
 app.get('/', (req, res) => {
   res.send('running');
