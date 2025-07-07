@@ -14,7 +14,6 @@ const Login = () => {
     containerRef.current.classList.remove("active");
   };
 
-  // 🔐 Signup Handler
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
     const username = e.target[0].value;
@@ -39,27 +38,30 @@ const Login = () => {
 
   // 🔓 Login Handler
   const handleLoginSubmit = async (e) => {
-    e.preventDefault();
-    const usernameOrEmail = e.target[0].value;
-    const password = e.target[1].value;
+  e.preventDefault();
+  const usernameOrEmail = e.target[0].value;
+  const password = e.target[1].value;
 
-    try {
-      const res = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usernameOrEmail, password }),
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usernameOrEmail, password }),
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
 
-      alert("Login successful: " + data.message);
-      navigate("/home"); // ✅ Redirect to Home.jsx
+    // ✅ Save user info to localStorage
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-    } catch (err) {
-      alert("Login failed: " + err.message);
-    }
-  };
+    alert("Login successful: " + data.message);
+    navigate("/home"); // ✅ Redirect to Home.jsx
+
+  } catch (err) {
+    alert("Login failed: " + err.message);
+  }
+};
 
   return (
     <div className="container" ref={containerRef}>

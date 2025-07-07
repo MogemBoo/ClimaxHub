@@ -11,6 +11,11 @@ const HomePage = () => {
   const [recentSeries, setRecentSeries] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [showLogout, setShowLogout] = useState(false);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const topScrollRef = useRef(null);
   const recentMovieScrollRef = useRef(null);
@@ -39,7 +44,6 @@ const HomePage = () => {
 
   useEffect(() => {
     if (debounceTimer) clearTimeout(debounceTimer);
-
     if (searchQuery.trim() === "") {
       setSearchResults([]);
       return;
@@ -53,9 +57,8 @@ const HomePage = () => {
           console.error("Error searching:", err);
           setSearchResults([]);
         });
-    }, 400); // Debounce delay of 400ms
+    }, 400);
   }, [searchQuery]);
-
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -63,6 +66,12 @@ const HomePage = () => {
       .then((res) => res.json())
       .then((data) => setSearchResults(data))
       .catch((err) => console.error("Error searching movies:", err));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    setShowLogout(false);
   };
 
   const scroll = (ref, direction) => {
@@ -93,17 +102,44 @@ const HomePage = () => {
         <button type="submit" className="search-button">
           Search
         </button>
+
         <button
           type="button"
           className="top-movies-btn"
           onClick={() => navigate("/top-movies")}
-          aria-label="Go to Top Movies page"
         >
           Top Movies
         </button>
-        <button type = "button" className = "login-btn" onClick={() => navigate("/login")} aria-label="Go to Login page">
-          Login
+
+        {!user ? (
+          <button
+            type="button"
+            className="login-btn"
+            onClick={() => navigate("/login")}
+          >
+            Login
           </button>
+        ) : (
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              className="login-btn"
+              onClick={() => setShowLogout(!showLogout)}
+            >
+              {user.username}
+            </button>
+            {showLogout && (
+              <button
+                type="button"
+                className="login-btn"
+                onClick={handleLogout}
+                style={{ marginLeft: "10px", backgroundColor: "#c0392b", borderColor: "#c0392b" }}
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        )}
       </form>
 
       {searchQuery.trim() !== "" && (
@@ -117,66 +153,27 @@ const HomePage = () => {
         </div>
       )}
 
-
-      <div className="section">
-        <h2 className="section-title"> Top Rated Movies</h2>
-        <div className="scroll-container">
-          <button
-            className="scroll-arrow left"
-            onClick={() => scroll(topScrollRef, "left")}
-          >
-            ←
-          </button>
-          <MovieList movies={topMovies} scrollRef={topScrollRef} onCardClick={handleCardClick} />
-          <button
-            className="scroll-arrow right"
-            onClick={() => scroll(topScrollRef, "right")}
-          >
-            →
-          </button>
-        </div>
-      </div>
-
-      <div className="section">
-        <h2 className="section-title"> Recently Released Movies</h2>
-        <div className="scroll-container">
-          <button
-            className="scroll-arrow left"
-            onClick={() => scroll(recentMovieScrollRef, "left")}
-          >
-            ←
-          </button>
-          <MovieList movies={recentMovies} scrollRef={recentMovieScrollRef} onCardClick={handleCardClick} />
-          <button
-            className="scroll-arrow right"
-            onClick={() => scroll(recentMovieScrollRef, "right")}
-          >
-            →
-          </button>
-        </div>
-      </div>
-
-      <div className="section">
-        <h2 className="section-title"> Recently Released Series</h2>
-        <div className="scroll-container">
-          <button
-            className="scroll-arrow left"
-            onClick={() => scroll(recentSeriesScrollRef, "left")}
-          >
-            ←
-          </button>
-          <SeriesList series={recentSeries} scrollRef={recentSeriesScrollRef} onCardClick={handleCardClick} />
-          <button
-            className="scroll-arrow right"
-            onClick={() => scroll(recentSeriesScrollRef, "right")}
-          >
-            →
-          </button>
-        </div>
-      </div>
+      <Section title="Top Rated Movies" data={topMovies} scrollRef={topScrollRef} onCardClick={handleCardClick} />
+      <Section title="Recently Released Movies" data={recentMovies} scrollRef={recentMovieScrollRef} onCardClick={handleCardClick} />
+      <Section title="Recently Released Series" data={recentSeries} scrollRef={recentSeriesScrollRef} onCardClick={handleCardClick} isSeries />
     </div>
   );
 };
+
+const Section = ({ title, data, scrollRef, onCardClick, isSeries = false }) => (
+  <div className="section">
+    <h2 className="section-title">{title}</h2>
+    <div className="scroll-container">
+      <button className="scroll-arrow left" onClick={() => scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })}>←</button>
+      {isSeries ? (
+        <SeriesList series={data} scrollRef={scrollRef} onCardClick={onCardClick} />
+      ) : (
+        <MovieList movies={data} scrollRef={scrollRef} onCardClick={onCardClick} />
+      )}
+      <button className="scroll-arrow right" onClick={() => scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })}>→</button>
+    </div>
+  </div>
+);
 
 const MovieList = ({ movies, scrollRef, onCardClick }) => (
   <div className="movie-horizontal-scroll" ref={scrollRef}>
@@ -185,13 +182,8 @@ const MovieList = ({ movies, scrollRef, onCardClick }) => (
         key={movie.movie_id}
         className="movie-scroll-card"
         onClick={() => onCardClick("movies", movie.movie_id)}
-        style={{ cursor: "pointer" }}
       >
-        <img
-          src={movie.poster_url}
-          alt={movie.title}
-          className="movie-scroll-poster"
-        />
+        <img src={movie.poster_url} alt={movie.title} className="movie-scroll-poster" />
         <div>
           <h3 className="movie-title">{movie.title}</h3>
           <p className="movie-info">Rating: {movie.rating}</p>
@@ -209,13 +201,8 @@ const SeriesList = ({ series, scrollRef, onCardClick }) => (
         key={s.series_id}
         className="movie-scroll-card"
         onClick={() => onCardClick("series", s.series_id)}
-        style={{ cursor: "pointer" }}
       >
-        <img
-          src={s.poster_url}
-          alt={s.title}
-          className="movie-scroll-poster"
-        />
+        <img src={s.poster_url} alt={s.title} className="movie-scroll-poster" />
         <div>
           <h3 className="movie-title">{s.title}</h3>
           <p className="movie-info">Rating: {s.rating}</p>

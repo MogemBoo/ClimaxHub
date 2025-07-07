@@ -1,7 +1,6 @@
 import pool from '../db.js';
 import bcrypt from 'bcrypt';
 
-// Login user
 export async function login(req, res) {
   const { usernameOrEmail, password } = req.body;
 
@@ -44,9 +43,15 @@ export async function login(req, res) {
       [user.user_id]
     );
 
+    // ✅ Send user data back, no JWT
     res.json({ 
       message: 'Login successful', 
-      user: { user_id: user.user_id, username: user.username, email: user.email, is_admin: user.is_admin } 
+      user: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        is_admin: user.is_admin
+      }
     });
   } catch (err) {
     console.error('Login error:', err);
