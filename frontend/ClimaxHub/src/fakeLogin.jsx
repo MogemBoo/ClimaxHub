@@ -1,8 +1,10 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
   const containerRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleRegisterClick = () => {
     containerRef.current.classList.add("active");
@@ -12,7 +14,7 @@ const Login = () => {
     containerRef.current.classList.remove("active");
   };
 
-  // === 🟢 ADDED: Signup submit handler ===
+  // 🔐 Signup Handler
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
     const username = e.target[0].value;
@@ -27,14 +29,15 @@ const Login = () => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.message);
       alert("Registration successful: " + data.message);
+      containerRef.current.classList.remove("active"); // switch to login
     } catch (err) {
       alert("Registration failed: " + err.message);
     }
   };
 
-  // === 🟢 ADDED: Login submit handler ===
+  // 🔓 Login Handler
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     const usernameOrEmail = e.target[0].value;
@@ -48,8 +51,11 @@ const Login = () => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.message);
+
       alert("Login successful: " + data.message);
+      navigate("/home"); // ✅ Redirect to Home.jsx
+
     } catch (err) {
       alert("Login failed: " + err.message);
     }
@@ -57,8 +63,8 @@ const Login = () => {
 
   return (
     <div className="container" ref={containerRef}>
+      {/* Sign Up Form */}
       <div className="form-container sign-up">
-        {/* === 🟢 CHANGED: add onSubmit handler === */}
         <form onSubmit={handleSignUpSubmit}>
           <h1>Create Account</h1>
           <div className="social-icons">
@@ -68,15 +74,15 @@ const Login = () => {
             <a href="#"><i className="fab fa-linkedin-in"></i></a>
           </div>
           <span>or use your email for registration</span>
-          <input type="text" placeholder="Name" />
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
+          <input type="text" placeholder="Name" required />
+          <input type="email" placeholder="Email" required />
+          <input type="password" placeholder="Password" required />
           <button type="submit">Sign Up</button>
         </form>
       </div>
 
+      {/* Sign In Form */}
       <div className="form-container sign-in">
-        {/* === 🟢 CHANGED: add onSubmit handler === */}
         <form onSubmit={handleLoginSubmit}>
           <h1>Sign In</h1>
           <div className="social-icons">
@@ -86,13 +92,14 @@ const Login = () => {
             <a href="#"><i className="fab fa-linkedin-in"></i></a>
           </div>
           <span>or use your email and password</span>
-          <input type="text" placeholder="Username or Email" />
-          <input type="password" placeholder="Password" />
+          <input type="text" placeholder="Username or Email" required />
+          <input type="password" placeholder="Password" required />
           <a href="#">Forgot your password?</a>
           <button type="submit">Sign In</button>
         </form>
       </div>
 
+      {/* Toggle Panels */}
       <div className="toggle-container">
         <div className="toggle">
           <div className="toggle-panel toggle-left">
