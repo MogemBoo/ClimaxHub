@@ -13,9 +13,9 @@ const YourWatchlist = () => {
       return;
     }
 
-    fetch(`http://localhost:5000/api/watchlist/${user.username}`)
+    fetch(`http://localhost:5000/api/users/${user.user_id}`)
       .then((res) => res.json())
-      .then((data) => setWatchlist(data))
+      .then((data) => setWatchlist(data.watchlist || []))
       .catch((err) => {
         console.error("Failed to fetch watchlist:", err);
         setWatchlist([]);
@@ -29,24 +29,27 @@ const YourWatchlist = () => {
         <p className="watchlist-empty">Your watchlist is empty.</p>
       ) : (
         <div className="watchlist-grid">
-          {watchlist.map((movie) => (
-            <div
-              key={movie.movie_id}
-              className="watchlist-card"
-              onClick={() => navigate(`/details/movies/${movie.movie_id}`)}
-            >
-              <img
-                src={movie.poster_url}
-                alt={movie.title}
-                className="watchlist-poster"
-              />
-              <div className="watchlist-info">
-                <h3>{movie.title}</h3>
-                <p>Rating: {movie.rating}</p>
-                <p>Release: {movie.release_date}</p>
+          {watchlist.map((item) => {
+            const id = item.type === "movie" ? item.movie_id : item.series_id;
+            const url = item.type === "movie" ? `/details/movies/${id}` : `/details/series/${id}`;
+            return (
+              <div
+                key={`${item.type}-${id}`}
+                className="watchlist-card"
+                onClick={() => navigate(url)}
+              >
+                <img
+                  src={item.poster_url}
+                  alt={item.title}
+                  className="watchlist-poster"
+                />
+                <div className="watchlist-info">
+                  <h3>{item.title}</h3>
+                  <p>Status: {item.status}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

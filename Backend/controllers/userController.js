@@ -47,8 +47,41 @@ export const getUserProfile = async (req, res) => {
     // Merge ratings
     const allRatings = [...movieRatings.rows, ...seriesRatings.rows];
 
-    // Watchlist and reviews placeholders (you can update later)
-    const watchlist = [];
+    // Get movie watchlist
+    const movieWatchlist = await pool.query(
+      `SELECT 
+         m.movie_id,
+         m.title,
+         m.poster_url,
+         'movie' as type,
+         wm.status
+       FROM watchlist_movie wm
+       JOIN movie m ON wm.movie_id = m.movie_id
+       WHERE wm.watchlist_id = (
+         SELECT watchlist_id FROM watchlist WHERE user_id = $1
+       )`,
+      [user_id]
+    );
+
+    // Get series watchlist
+    const seriesWatchlist = await pool.query(
+      `SELECT 
+         s.series_id,
+         s.title,
+         s.poster_url,
+         'series' as type,
+         ws.status
+       FROM watchlist_series ws
+       JOIN series s ON ws.series_id = s.series_id
+       WHERE ws.watchlist_id = (
+         SELECT watchlist_id FROM watchlist WHERE user_id = $1
+       )`,
+      [user_id]
+    );
+
+    const allWatchlist = [...movieWatchlist.rows, ...seriesWatchlist.rows];
+
+    //reviews placeholders (you can update later)
     const reviews = [];
     const posts = []; // For your posts section
 
@@ -56,7 +89,7 @@ export const getUserProfile = async (req, res) => {
       username: user.username,
       created_at: user.created_at,
       ratings: allRatings,
-      watchlist,
+      watchlist: allWatchlist,
       reviews,
       posts,
     });
