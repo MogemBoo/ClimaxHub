@@ -4,7 +4,7 @@ export const getUserProfile = async (req, res) => {
   const user_id = req.params.user_id;
 
   try {
-    // Get basic user info (use created_at instead of joined_at)
+    // Get user basic info
     const userResult = await pool.query(
       `SELECT username, created_at FROM users WHERE user_id = $1`,
       [user_id]
@@ -16,28 +16,41 @@ export const getUserProfile = async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // Get ratings (movies + series combined)
+    // Get movie ratings with poster URL and movie_id
     const movieRatings = await pool.query(
-      `SELECT m.title, mr.rating as score, 'movie' as type
+      `SELECT 
+         m.movie_id,
+         m.title,
+         m.poster_url,
+         mr.rating as score,
+         'movie' as type
        FROM movie_review mr
        JOIN movie m ON mr.movie_id = m.movie_id
        WHERE mr.user_id = $1`,
       [user_id]
     );
 
+    // Get series ratings with poster URL and series_id
     const seriesRatings = await pool.query(
-      `SELECT s.title, sr.rating as score, 'series' as type
+      `SELECT 
+         s.series_id,
+         s.title,
+         s.poster_url,
+         sr.rating as score,
+         'series' as type
        FROM series_review sr
        JOIN series s ON sr.series_id = s.series_id
        WHERE sr.user_id = $1`,
       [user_id]
     );
 
+    // Merge ratings
     const allRatings = [...movieRatings.rows, ...seriesRatings.rows];
 
-    // Watchlist and reviews placeholders for now
+    // Watchlist and reviews placeholders (you can update later)
     const watchlist = [];
     const reviews = [];
+    const posts = []; // For your posts section
 
     res.json({
       username: user.username,
@@ -45,10 +58,11 @@ export const getUserProfile = async (req, res) => {
       ratings: allRatings,
       watchlist,
       reviews,
+      posts,
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Error loading user profile:", err);
     res.status(500).json({ message: "Error loading user profile" });
   }
 };
