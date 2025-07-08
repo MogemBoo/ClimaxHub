@@ -36,7 +36,6 @@ const Login = () => {
     }
   };
 
-  // 🔓 Login Handler
   const handleLoginSubmit = async (e) => {
   e.preventDefault();
   const usernameOrEmail = e.target[0].value;
@@ -52,11 +51,10 @@ const Login = () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
 
-    // ✅ Save user info to localStorage
+
     localStorage.setItem("user", JSON.stringify(data.user));
 
-    alert("Login successful: " + data.message);
-    navigate("/home"); // ✅ Redirect to Home.jsx
+    navigate("/home");
 
   } catch (err) {
     alert("Login failed: " + err.message);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import { FaStar } from 'react-icons/fa';
 import './Details.css';
 
 const Details = () => {
@@ -7,6 +8,9 @@ const Details = () => {
   const location = useLocation();
   const [data, setData] = useState(null);
   const [type, setType] = useState('movie');
+  const [showRatingCard, setShowRatingCard] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     const isSeries = location.pathname.includes('/series/');
@@ -22,6 +26,42 @@ const Details = () => {
 
   return (
     <div className="fullscreen-wrapper">
+      {/* Rating Button */}
+      <button className="rating-btn" onClick={() => setShowRatingCard(prev => !prev)}>
+        ⭐ Rating
+      </button>
+
+      {/* Rating Popup Card */}
+      {showRatingCard && (
+        <div className="rating-popup">
+          <div className="rating-card">
+            <h3>Rate this {type}</h3>
+            <div className="stars">
+              {[...Array(10)].map((_, index) => {
+                const ratingVal = index + 1;
+                return (
+                  <label key={ratingVal}>
+                    <input
+                      type="radio"
+                      name="rating"
+                      value={ratingVal}
+                      onClick={() => setUserRating(ratingVal)}
+                    />
+                    <FaStar
+                      size={24}
+                      color={ratingVal <= (hoverRating || userRating) ? '#ffc107' : '#444'}
+                      onMouseEnter={() => setHoverRating(ratingVal)}
+                      onMouseLeave={() => setHoverRating(0)}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+            <p>Your Rating: {userRating}/10</p>
+          </div>
+        </div>
+      )}
+
       <div className="background-blur" style={{ backgroundImage: `url(${data.poster_url})` }}></div>
 
       <div className="content">

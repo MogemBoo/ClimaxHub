@@ -143,3 +143,82 @@ h1 {
   font-size: 0.85rem;
   color: #ccc;
 }
+
+/* === Rating Button === */
+.rating-btn {
+  position: fixed;
+  top: 20px;
+  right: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffc107;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  font-size: 1rem;
+  border-radius: 1.5rem;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.rating-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* === Rating Popup Card === */
+.rating-popup {
+  position: fixed;
+  top: 80px;
+  right: 30px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  z-index: 10;
+  width: 240px;
+  animation: fadeIn 0.3s ease;
+}
+
+.rating-card h3 {
+  margin-top: 0;
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  gap: 4px;
+}
+
+.stars input {
+  display: none;
+}
+
+.stars label {
+  cursor: pointer;
+}
+
+.rating-card p {
+  text-align: center;
+  color: #ccc;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+/* Smooth appearance */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
