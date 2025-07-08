@@ -19,19 +19,88 @@ const Details = () => {
     fetch(`http://localhost:5000/api/${isSeries ? 'series' : 'movies'}/${id}`)
       .then(res => res.json())
       .then(setData)
-      .catch(() => { });
+      .catch(() => {});
   }, [id, location]);
+
+  const fetchUserRating = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setUserRating(0);
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/rating/${type}/${user.user_id}/${id}`);
+      if (!res.ok) {
+        setUserRating(0);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.rating) {
+        setUserRating(data.rating);
+      } else {
+        setUserRating(0);
+      }
+    } catch (err) {
+      setUserRating(0);
+    }
+  };
+
+  const handleToggleRatingCard = () => {
+    const newState = !showRatingCard;
+    setShowRatingCard(newState);
+
+    if (newState) {
+      fetchUserRating();
+    }
+  };
+
+  const handleRate = async (ratingVal) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      alert("Please login to rate.");
+      return;
+    }
+
+    const body = {
+      user_id: user.user_id,
+      rating: ratingVal,
+      comments: "",
+    };
+
+    if (type === "movie") {
+      body.movie_id = parseInt(id);
+    } else {
+      body.series_id = parseInt(id);
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/rating/${type}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setUserRating(ratingVal);
+      alert("Rating submitted successfully!");
+    } catch (err) {
+      alert("Failed to submit rating: " + err.message);
+    }
+  };
 
   if (!data) return <div className="loader">Loading...</div>;
 
   return (
     <div className="fullscreen-wrapper">
-      {/* Rating Button */}
-      <button className="rating-btn" onClick={() => setShowRatingCard(prev => !prev)}>
+      <button className="rating-btn" onClick={handleToggleRatingCard}>
         ⭐ Rating
       </button>
 
-      {/* Rating Popup Card */}
       {showRatingCard && (
         <div className="rating-popup">
           <div className="rating-card">
@@ -45,13 +114,14 @@ const Details = () => {
                       type="radio"
                       name="rating"
                       value={ratingVal}
-                      onClick={() => setUserRating(ratingVal)}
+                      style={{ display: "none" }}
                     />
                     <FaStar
                       size={24}
                       color={ratingVal <= (hoverRating || userRating) ? '#ffc107' : '#444'}
                       onMouseEnter={() => setHoverRating(ratingVal)}
                       onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => handleRate(ratingVal)}
                     />
                   </label>
                 );
@@ -89,7 +159,6 @@ const Details = () => {
       </div>
 
       <div className="extras">
-        {/* Cast Section */}
         <h2 className="section-title">{type} Cast</h2>
         <div className="people-grid">
           {(data.cast || []).map(person => (
@@ -105,7 +174,6 @@ const Details = () => {
           ))}
         </div>
 
-        {/* Crew Section */}
         <h2 className="section-title">{type} Crew</h2>
         <div className="people-grid">
           {(data.crew || []).map(person => (

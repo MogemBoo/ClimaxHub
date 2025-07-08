@@ -5,6 +5,7 @@ import moviesRoutes from './routes/movies.js';
 import seriesRoutes from './routes/series.js';
 import loginRoutes from './routes/login.js';
 import signupRoutes from './routes/signup.js';
+import ratingRoutes from './routes/rating.js';
 import cors from 'cors';
 
 
@@ -20,6 +21,7 @@ app.use('/api/movies', moviesRoutes);
 app.use('/api/series', seriesRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/signup', signupRoutes);
+app.use('/api/rating', ratingRoutes);
 
 app.get('/', (req, res) => {
   res.send('running');
