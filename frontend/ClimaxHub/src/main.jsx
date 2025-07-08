@@ -2,6 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Details from "./Details";
+import YourProfile from './YourProfile.jsx';
+
+
 
 import './index.css';
 import HomePage from './Home.jsx';
@@ -16,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/top-movies" element={<TopMovies />} />
+        <Route path="/your-profile" element={<YourProfile />} />
         <Route path="/get-all" element={<GetAll />} />
         <Route path="/details/:type/:id" element={<Details />} />
         <Route path="/login" element={<Login />} />

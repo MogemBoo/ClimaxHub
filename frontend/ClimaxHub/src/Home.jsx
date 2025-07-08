@@ -11,7 +11,7 @@ const HomePage = () => {
   const [recentSeries, setRecentSeries] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showLogout, setShowLogout] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
@@ -71,7 +71,7 @@ const HomePage = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    setShowLogout(false);
+    setShowDropdown(false);
   };
 
   const scroll = (ref, direction) => {
@@ -87,6 +87,16 @@ const HomePage = () => {
     navigate(`/details/${type}/${id}`);
   };
 
+  useEffect(() => {
+    const closeDropdown = (e) => {
+      if (!e.target.closest(".user-menu-wrapper")) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("click", closeDropdown);
+    return () => document.removeEventListener("click", closeDropdown);
+  }, []);
+
   return (
     <div className="homepage-container">
       <h1 className="homepage-title">Welcome to ClimaxHub</h1>
@@ -99,9 +109,7 @@ const HomePage = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
         />
-        <button type="submit" className="search-button">
-          Search
-        </button>
+        <button type="submit" className="search-button">Search</button>
 
         <button
           type="button"
@@ -120,23 +128,29 @@ const HomePage = () => {
             Login
           </button>
         ) : (
-          <div style={{ position: "relative" }}>
+          <div className="user-menu-wrapper">
             <button
               type="button"
-              className="login-btn"
-              onClick={() => setShowLogout(!showLogout)}
+              className="login-btn user-btn"
+              onClick={() => setShowDropdown(!showDropdown)}
             >
               {user.username}
             </button>
-            {showLogout && (
-              <button
-                type="button"
-                className="login-btn"
-                onClick={handleLogout}
-                style={{ marginLeft: "10px", backgroundColor: "#c0392b", borderColor: "#c0392b" }}
-              >
-                Logout
-              </button>
+            {showDropdown && (
+              <div className="user-dropdown">
+                <button className="dropdown-item" onClick={() => navigate("/your-profile")}>
+                  Your Profile
+                </button>
+                <button className="dropdown-item" onClick={() => navigate("/watchlist")}>
+                  Your Watchlist
+                </button>
+                <button className="dropdown-item" onClick={() => navigate("/ratings")}>
+                  Your Ratings
+                </button>
+                <button className="dropdown-item logout" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
             )}
           </div>
         )}

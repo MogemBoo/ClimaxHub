@@ -167,3 +167,60 @@
   font-size: 0.9rem;
   color: #bbb;
 }
+
+.user-menu-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.user-btn {
+  position: relative;
+  z-index: 2;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 115%;
+  right: 0;
+  background-color: #222;
+  border: 1px solid #f1c40f66;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 0.25rem 0;
+  animation: dropdown-fade 0.2s ease-in-out;
+}
+
+.dropdown-item {
+  background: transparent;
+  color: #f1c40f;
+  border: none;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #333;
+}
+
+.dropdown-item.logout {
+  color: #e74c3c;
+}
+
+@keyframes dropdown-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
