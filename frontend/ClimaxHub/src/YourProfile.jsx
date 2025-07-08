@@ -20,7 +20,7 @@ const YourProfile = () => {
   return (
     <div className="profile-container">
       <h1 className="profile-title">{user.username}'s Profile</h1>
-      <p className="profile-joined">Joined: {new Date(user.joined_at).toLocaleDateString()}</p>
+      <p className="profile-joined">Joined: {new Date(user.created_at).toLocaleDateString()}</p>
 
       <div className="profile-section">
         <h2>Your Ratings</h2>
