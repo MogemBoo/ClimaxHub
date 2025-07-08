@@ -27,8 +27,13 @@ const YourProfile = () => {
         {user.ratings?.length ? (
           <ul className="profile-list">
             {user.ratings.map((r, i) => (
-              <li key={i}>
-                ⭐ {r.score}/10 — <strong>{r.title}</strong> ({r.type})
+              <li key={i} className="profile-item">
+                {r.poster_url && (
+                  <img src={r.poster_url} alt={r.title} className="poster-thumb" />
+                )}
+                <div>
+                  ⭐ {r.score}/10 — <strong>{r.title}</strong> ({r.type})
+                </div>
               </li>
             ))}
           </ul>
@@ -42,8 +47,13 @@ const YourProfile = () => {
         {user.watchlist?.length ? (
           <ul className="profile-list">
             {user.watchlist.map((item, i) => (
-              <li key={i}>
-                📌 {item.title} ({item.type})
+              <li key={i} className="profile-item">
+                {item.poster_url && (
+                  <img src={item.poster_url} alt={item.title} className="poster-thumb" />
+                )}
+                <div>
+                  📌 {item.title} ({item.type})
+                </div>
               </li>
             ))}
           </ul>
@@ -64,6 +74,21 @@ const YourProfile = () => {
           </ul>
         ) : (
           <p className="empty-text">You haven’t written any reviews yet.</p>
+        )}
+      </div>
+
+      <div className="profile-section">
+        <h2>Your Posts</h2>
+        {user.posts?.length ? (
+          <ul className="profile-list">
+            {user.posts.map((post, i) => (
+              <li key={i}>
+                <strong>{post.title}</strong>: {post.content}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="empty-text">You haven't posted anything yet.</p>
         )}
       </div>
     </div>

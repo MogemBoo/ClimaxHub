@@ -1,9 +1,12 @@
 .profile-container {
+  width: 100vw;
+  min-height: 100vh;
   padding: 2rem;
   background-color: #111;
   color: #f1c40f;
   font-family: 'Segoe UI', sans-serif;
-  min-height: 100vh;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .profile-title {
@@ -36,7 +39,10 @@
   padding-left: 0;
 }
 
-.profile-list li {
+.profile-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid #333;
   font-size: 1rem;
@@ -45,6 +51,14 @@
 
 .profile-list li:last-child {
   border-bottom: none;
+}
+
+.poster-thumb {
+  width: 50px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .empty-text {
