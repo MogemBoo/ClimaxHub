@@ -6,7 +6,7 @@ let debounceTimer = null;
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [topMovies, setTopMovies] = useState([]);
+  const [recommendedMovies, setRecommendedMovies] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
   const [recentSeries, setRecentSeries] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,11 +22,18 @@ const HomePage = () => {
   const recentSeriesScrollRef = useRef(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/movies/top")
+    fetch("http://localhost:5000/api/movies/top") // ekhane recommended movie fetch korba
       .then((res) => res.json())
       .then((data) => setTopMovies(data))
       .catch((err) => console.error("Error fetching top movies:", err));
   }, []);
+//   useEffect(() => {
+//   fetch("http://localhost:5000/api/movies/recommend")
+//     .then((res) => res.json())
+//     .then((data) => setRecommendedMovies(data))
+//     .catch((err) => console.error("Error fetching recommended movies:", err));
+// }, []);
+
 
   useEffect(() => {
     fetch("http://localhost:5000/api/movies/recent")
@@ -167,7 +174,7 @@ const HomePage = () => {
         </div>
       )}
 
-      <Section title="Top Rated Movies" data={topMovies} scrollRef={topScrollRef} onCardClick={handleCardClick} />
+      <Section title="Recommended for You" data={recommendedMovies} scrollRef={topScrollRef} onCardClick={handleCardClick} />
       <Section title="Recently Released Movies" data={recentMovies} scrollRef={recentMovieScrollRef} onCardClick={handleCardClick} />
       <Section title="Recently Released Series" data={recentSeries} scrollRef={recentSeriesScrollRef} onCardClick={handleCardClick} isSeries />
     </div>

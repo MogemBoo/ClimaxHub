@@ -1,4 +1,4 @@
-.top-movies-btn {
+/* .top-movies-btn {
   background-color: #f1c40f;
   color: #111;
   border: none;
@@ -11,7 +11,7 @@
 
 .top-movies-btn:hover {
   background-color: #d4ac0d;
-}
+} */
 .login-btn {
   background-color: transparent;
   color: #f1c40f;
@@ -60,14 +60,22 @@
   color: white;
 }
 
-.search-button {
+.search-button,
+.top-movies-btn {
+  background-color: transparent;
+  color: #f1c40f;
+  border: 2px solid #f1c40f;
+  border-radius: 6px;
   padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover,
+.top-movies-btn:hover {
   background-color: #f1c40f;
   color: #111;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
 }
 
 .section {
