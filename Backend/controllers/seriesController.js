@@ -228,7 +228,7 @@ export async function getRecentSeries(req, res) {
       SELECT series_id, title, start_date, rating, poster_url
       FROM series
       ORDER BY start_date DESC
-      LIMIT 8
+      LIMIT 10
     `);
     res.json(result.rows);
   } catch (error) {
