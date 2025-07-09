@@ -7,6 +7,7 @@ let debounceTimer = null;
 const HomePage = () => {
   const navigate = useNavigate();
   const [recommendedMovies, setRecommendedMovies] = useState([]);
+  const [recommendedSeries, setRecommendedSeries] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
   const [recentSeries, setRecentSeries] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,22 +19,21 @@ const HomePage = () => {
   });
 
   const topScrollRef = useRef(null);
+  const recMovieScrollRef = useRef(null);
+  const recSeriesScrollRef = useRef(null);
   const recentMovieScrollRef = useRef(null);
   const recentSeriesScrollRef = useRef(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/movies/top") // ekhane recommended movie fetch korba
+    if (!user) return;
+    fetch(`http://localhost:5000/api/recommendations/${user.user_id}`)
       .then((res) => res.json())
-      .then((data) => setTopMovies(data))
-      .catch((err) => console.error("Error fetching top movies:", err));
-  }, []);
-//   useEffect(() => {
-//   fetch("http://localhost:5000/api/movies/recommend")
-//     .then((res) => res.json())
-//     .then((data) => setRecommendedMovies(data))
-//     .catch((err) => console.error("Error fetching recommended movies:", err));
-// }, []);
-
+      .then((data) => {
+        setRecommendedMovies(data.movies || []);
+        setRecommendedSeries(data.series || []);
+      })
+      .catch((err) => console.error("Error fetching recommendations:", err));
+  }, [user]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/movies/recent")
@@ -79,15 +79,6 @@ const HomePage = () => {
     localStorage.removeItem("user");
     setUser(null);
     setShowDropdown(false);
-  };
-
-  const scroll = (ref, direction) => {
-    if (!ref.current) return;
-    const scrollAmount = 300;
-    ref.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
   };
 
   const handleCardClick = (type, id) => {
@@ -174,35 +165,70 @@ const HomePage = () => {
         </div>
       )}
 
-      <Section title="Recommended for You" data={recommendedMovies} scrollRef={topScrollRef} onCardClick={handleCardClick} />
-      <Section title="Recently Released Movies" data={recentMovies} scrollRef={recentMovieScrollRef} onCardClick={handleCardClick} />
-      <Section title="Recently Released Series" data={recentSeries} scrollRef={recentSeriesScrollRef} onCardClick={handleCardClick} isSeries />
+      <Section
+        title="Recommended Movies for You"
+        data={recommendedMovies}
+        scrollRef={recMovieScrollRef}
+        onCardClick={(type, id) => handleCardClick("movies", id)}
+        isRecommendation
+        isSeries={false}
+      />
+
+      <Section
+        title="Recommended Series for You"
+        data={recommendedSeries}
+        scrollRef={recSeriesScrollRef}
+        onCardClick={(type, id) => handleCardClick("series", id)}
+        isRecommendation
+        isSeries
+      />
+
+      <Section
+        title="Recently Released Movies"
+        data={recentMovies}
+        scrollRef={recentMovieScrollRef}
+        onCardClick={(type, id) => handleCardClick("movies", id)}
+        isSeries={false}
+      />
+
+      <Section
+        title="Recently Released Series"
+        data={recentSeries}
+        scrollRef={recentSeriesScrollRef}
+        onCardClick={(type, id) => handleCardClick("series", id)}
+        isSeries
+      />
     </div>
   );
 };
 
-const Section = ({ title, data, scrollRef, onCardClick, isSeries = false }) => (
+const Section = ({ title, data, scrollRef, onCardClick, isSeries = false, isRecommendation = false }) => (
   <div className="section">
     <h2 className="section-title">{title}</h2>
     <div className="scroll-container">
       <button className="scroll-arrow left" onClick={() => scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })}>←</button>
       {isSeries ? (
-        <SeriesList series={data} scrollRef={scrollRef} onCardClick={onCardClick} />
+        <SeriesList series={data} scrollRef={scrollRef} onCardClick={onCardClick} isRecommendation={isRecommendation} />
       ) : (
-        <MovieList movies={data} scrollRef={scrollRef} onCardClick={onCardClick} />
+        <MovieList movies={data} scrollRef={scrollRef} onCardClick={onCardClick} isRecommendation={isRecommendation} />
       )}
       <button className="scroll-arrow right" onClick={() => scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })}>→</button>
     </div>
   </div>
 );
 
-const MovieList = ({ movies, scrollRef, onCardClick }) => (
+const MovieList = ({ movies, scrollRef, onCardClick, isRecommendation = false }) => (
   <div className="movie-horizontal-scroll" ref={scrollRef}>
     {movies.map((movie) => (
       <div
-        key={movie.movie_id}
+        key={isRecommendation ? movie.recommended_movie_id : movie.movie_id}
         className="movie-scroll-card"
-        onClick={() => onCardClick("movies", movie.movie_id)}
+        onClick={() =>
+          onCardClick(
+            "movies",
+            isRecommendation ? movie.recommended_movie_id : movie.movie_id
+          )
+        }
       >
         <img src={movie.poster_url} alt={movie.title} className="movie-scroll-poster" />
         <div>
@@ -215,13 +241,18 @@ const MovieList = ({ movies, scrollRef, onCardClick }) => (
   </div>
 );
 
-const SeriesList = ({ series, scrollRef, onCardClick }) => (
+const SeriesList = ({ series, scrollRef, onCardClick, isRecommendation = false }) => (
   <div className="movie-horizontal-scroll" ref={scrollRef}>
     {series.map((s) => (
       <div
-        key={s.series_id}
+        key={isRecommendation ? s.recommended_series_id : s.series_id}
         className="movie-scroll-card"
-        onClick={() => onCardClick("series", s.series_id)}
+        onClick={() =>
+          onCardClick(
+            "series",
+            isRecommendation ? s.recommended_series_id : s.series_id
+          )
+        }
       >
         <img src={s.poster_url} alt={s.title} className="movie-scroll-poster" />
         <div>
