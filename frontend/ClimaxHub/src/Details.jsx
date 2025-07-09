@@ -11,6 +11,7 @@ const Details = () => {
   const [showRatingCard, setShowRatingCard] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     const isSeries = location.pathname.includes('/series/');
@@ -19,7 +20,7 @@ const Details = () => {
     fetch(`http://localhost:5000/api/${isSeries ? 'series' : 'movies'}/${id}`)
       .then(res => res.json())
       .then(setData)
-      .catch(() => { });
+      .catch(() => {});
   }, [id, location]);
 
   const fetchUserRating = async () => {
@@ -39,8 +40,10 @@ const Details = () => {
       const data = await res.json();
       if (data.rating) {
         setUserRating(data.rating);
+        setComment(data.comments || "");
       } else {
         setUserRating(0);
+        setComment("");
       }
     } catch (err) {
       setUserRating(0);
@@ -55,76 +58,59 @@ const Details = () => {
       fetchUserRating();
     }
   };
+
   const handleAddToWatchlist = async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user) {
-    alert("Please login to add to watchlist.");
-    return;
-  }
-
-  const body = {
-    user_id: user.user_id,
-    status: "to-watch", // default status
-  };
-
-  if (type === "movie") {
-    body.movie_id = parseInt(id);
-  } else {
-    body.series_id = parseInt(id);
-  }
-
-  try {
-    const res = await fetch("http://localhost:5000/api/watchlist/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.message);
-    alert("Added to watchlist successfully!");
-  } catch (err) {
-    alert("Failed to add to watchlist: " + err.message);
-  }
-};
-
-
-
-
-  const handleRate = async (ratingVal) => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
-      alert("Please login to rate.");
+      alert("Please login to add to watchlist.");
       return;
     }
 
     const body = {
       user_id: user.user_id,
-      rating: ratingVal,
-      comments: "",
+      status: "to-watch",
+      [type === "movie" ? "movie_id" : "series_id"]: parseInt(id),
     };
 
-    if (type === "movie") {
-      body.movie_id = parseInt(id);
-    } else {
-      body.series_id = parseInt(id);
+    try {
+      const res = await fetch("http://localhost:5000/api/watchlist/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || data.message);
+      alert("Added to watchlist successfully!");
+    } catch (err) {
+      alert("Failed to add to watchlist: " + err.message);
     }
+  };
+
+  const handleSubmitRating = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      alert("Please login to submit rating.");
+      return;
+    }
+
+    const body = {
+      user_id: user.user_id,
+      rating: userRating,
+      comments: comment,
+      [type === "movie" ? "movie_id" : "series_id"]: parseInt(id),
+    };
 
     try {
       const res = await fetch(`http://localhost:5000/api/rating/${type}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      setUserRating(ratingVal);
-      alert("Rating submitted successfully!");
+      alert("Rating and comment submitted successfully!");
     } catch (err) {
       alert("Failed to submit rating: " + err.message);
     }
@@ -140,7 +126,6 @@ const Details = () => {
       <button className="watchlist-btn" onClick={handleAddToWatchlist}>
         📌 Watchlist
       </button>
-
 
       {showRatingCard && (
         <div className="rating-popup">
@@ -162,42 +147,68 @@ const Details = () => {
                       color={ratingVal <= (hoverRating || userRating) ? '#ffc107' : '#444'}
                       onMouseEnter={() => setHoverRating(ratingVal)}
                       onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => handleRate(ratingVal)}
+                      onClick={() => setUserRating(ratingVal)}
                     />
                   </label>
                 );
               })}
             </div>
             <p>Your Rating: {userRating}/10</p>
+
+            <textarea
+              placeholder="Leave a comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="comment-input"
+              rows={3}
+            />
+            <button className="submit-rating-btn" onClick={handleSubmitRating}>
+              Submit
+            </button>
           </div>
         </div>
       )}
 
       <div className="background-blur" style={{ backgroundImage: `url(${data.poster_url})` }}></div>
 
-      <div className="content">
-        <img className="poster" src={data.poster_url} alt={data.title} />
-
-        <div className="info">
-          <h1>{data.title}</h1>
-          <p className="sub">
-            {new Date(type === 'movie' ? data.release_date : data.start_date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-            {data.duration ? ` • ${data.duration} min` : ''}
-            {data.rating ? ` • ⭐ ${data.rating}` : ''}
-          </p>
-          <p className="desc">{data.description}</p>
-
-          <div className="tags">
-            {(data.genres || []).map((g, i) => (
-              <span className="tag" key={i}>{g}</span>
-            ))}
-          </div>
-        </div>
+      <div className="content row-layout">
+  <div className="left-col">
+    <img className="poster-large" src={data.poster_url} alt={data.title} />
+    <div className="info-under-poster">
+      <h1>{data.title}</h1>
+      <p className="sub">
+        {new Date(type === 'movie' ? data.release_date : data.start_date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+        {data.duration ? ` • ${data.duration} min` : ''}
+        {data.rating ? ` • ⭐ ${data.rating}` : ''}
+      </p>
+      <p className="desc">{data.description}</p>
+      <div className="tags">
+        {(data.genres || []).map((g, i) => (
+          <span className="tag" key={i}>{g}</span>
+        ))}
       </div>
+    </div>
+  </div>
+
+  {data.trailer_url && (
+    <div className="right-section">
+      <div className="trailer-container">
+        <iframe
+          src={data.trailer_url.replace("watch?v=", "embed/")}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="Trailer"
+        ></iframe>
+      </div>
+    </div>
+  )}
+</div>
+
 
       <div className="extras">
         <h2 className="section-title">{type} Cast</h2>
