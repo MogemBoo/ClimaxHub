@@ -76,10 +76,15 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    setShowDropdown(false);
-  };
+  localStorage.removeItem("user");
+  setUser(null);
+  setShowDropdown(false);
+
+  setRecommendedMovies([]);
+  setRecommendedSeries([]);
+  setSearchResults([]);
+};
+
 
   const handleCardClick = (type, id) => {
     navigate(`/details/${type}/${id}`);
@@ -165,23 +170,29 @@ const HomePage = () => {
         </div>
       )}
 
-      <Section
-        title="Recommended Movies for You"
-        data={recommendedMovies}
-        scrollRef={recMovieScrollRef}
-        onCardClick={(type, id) => handleCardClick("movies", id)}
-        isRecommendation
-        isSeries={false}
-      />
 
-      <Section
-        title="Recommended Series for You"
-        data={recommendedSeries}
-        scrollRef={recSeriesScrollRef}
-        onCardClick={(type, id) => handleCardClick("series", id)}
-        isRecommendation
-        isSeries
-      />
+      {user && (
+  <>
+    <Section
+      title="Recommended Movies for You"
+      data={recommendedMovies}
+      scrollRef={recMovieScrollRef}
+      onCardClick={(type, id) => handleCardClick("movies", id)}
+      isRecommendation
+      isSeries={false}
+    />
+
+    <Section
+      title="Recommended Series for You"
+      data={recommendedSeries}
+      scrollRef={recSeriesScrollRef}
+      onCardClick={(type, id) => handleCardClick("series", id)}
+      isRecommendation
+      isSeries
+    />
+  </>
+)}
+
 
       <Section
         title="Recently Released Movies"
