@@ -157,12 +157,22 @@ export async function getSeriesById(req, res) {
       season.episodes = episodesResult.rows;
     }
 
+    const reviewsResult = await pool.query(`
+  SELECT r.review_id, r.rating, r.comments, r.created_at, p.username AS reviewer_name
+  FROM series_review r
+  JOIN users p ON r.user_id = p.user_id
+  WHERE r.series_id = $1
+  ORDER BY r.created_at DESC
+`, [seriesId]);
+
+
     res.json({
       ...series,
       genres: genresResult.rows.map(g => g.name),
       cast: castResult.rows,
       crew: crewResult.rows,
       seasons: seasonsResult.rows,
+      reviews: reviewsResult.rows,
     });
   } catch (error) {
     console.error('Error fetching series by ID:', error);

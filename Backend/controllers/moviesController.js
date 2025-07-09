@@ -123,11 +123,20 @@ export async function getMovieById(req, res) {
       WHERE mc.movie_id = $1
     `, [movieId]);
 
+    const reviewsResult = await pool.query(`
+      SELECT mr.review_id, mr.user_id, u.username, mr.rating, mr.comments, mr.created_at
+      FROM movie_review mr
+      JOIN users u ON mr.user_id = u.user_id
+      WHERE mr.movie_id = $1
+      ORDER BY mr.created_at DESC
+    `, [movieId]);
+
     res.json({
       ...movie,
       genres: genresResult.rows.map(g => g.name),
       cast: castResult.rows,
       crew: crewResult.rows,
+      reviews: reviewsResult.rows
     });
   } catch (error) {
     console.error('Error fetching movie by ID:', error);
