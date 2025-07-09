@@ -13,9 +13,9 @@ const YourWatchlist = () => {
       return;
     }
 
-    fetch(`http://localhost:5000/api/users/${user.user_id}`)
+    fetch(`http://localhost:5000/api/watchlist/${user.user_id}`)
       .then((res) => res.json())
-      .then((data) => setWatchlist(data.watchlist || []))
+      .then((data) => setWatchlist(data || []))
       .catch((err) => {
         console.error("Failed to fetch watchlist:", err);
         setWatchlist([]);
@@ -42,6 +42,7 @@ const YourWatchlist = () => {
                   src={item.poster_url}
                   alt={item.title}
                   className="watchlist-poster"
+                  onError={(e) => { e.target.src = "/fallback.jpg"; }}
                 />
                 <div className="watchlist-info">
                   <h3>{item.title}</h3>

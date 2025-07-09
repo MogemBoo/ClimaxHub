@@ -144,7 +144,7 @@ const HomePage = () => {
                 <button className="dropdown-item" onClick={() => navigate("/your-profile")}>
                   Your Profile
                 </button>
-                <button className="dropdown-item" onClick={() => navigate("/your-watchlist")}>
+                <button className="dropdown-item" onClick={() => navigate("/your-watchlist")}> 
                   Your Watchlist
                 </button>
                 <button className="dropdown-item" onClick={() => navigate("/ratings")}>

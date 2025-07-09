@@ -242,3 +242,43 @@ export async function getAllSeries(req, res) {
     res.status(500).json({ error: 'Failed to fetch all series' });
   }
 }
+
+export async function getSeriesEpisodes(req, res) {
+  const seriesId = req.params.id;
+
+  try {
+    // Get all seasons for the series
+    const seasonsResult = await pool.query(`
+      SELECT season_id, season_number
+      FROM season
+      WHERE series_id = $1
+      ORDER BY season_number
+    `, [seriesId]);
+
+    // For each season, get episodes
+    const episodesBySeason = {};
+
+    for (const season of seasonsResult.rows) {
+      const episodesResult = await pool.query(`
+        SELECT episode_id, episode_number, title, air_date, duration, description
+        FROM episode
+        WHERE season_id = $1
+        ORDER BY episode_number
+      `, [season.season_id]);
+
+      episodesBySeason[season.season_number] = episodesResult.rows;
+    }
+
+    // Flatten episodes into one array with a 'season' field for frontend convenience
+    const allEpisodes = [];
+    for (const [seasonNum, episodes] of Object.entries(episodesBySeason)) {
+      episodes.forEach(ep => ep.season = parseInt(seasonNum));
+      allEpisodes.push(...episodes);
+    }
+
+    res.json(allEpisodes);
+  } catch (error) {
+    console.error('Error fetching episodes:', error);
+    res.status(500).json({ error: 'Failed to fetch episodes' });
+  }
+}

@@ -56,37 +56,40 @@ const Details = () => {
     }
   };
   const handleAddToWatchlist = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) {
-      alert("Please login to add to watchlist.");
-      return;
-    }
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    alert("Please login to add to watchlist.");
+    return;
+  }
 
-    const body = {
-      user_id: user.user_id,
-    };
-    if (type === "movie") {
-      body.movie_id = parseInt(id);
-    } else {
-      body.series_id = parseInt(id);
-    }
-
-    try {
-      const res = await fetch("http://localhost:5000/api/watchlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      alert("Added to watchlist successfully!");
-    } catch (err) {
-      alert("Failed to add to watchlist: " + err.message);
-    }
+  const body = {
+    user_id: user.user_id,
+    status: "to-watch", // default status
   };
+
+  if (type === "movie") {
+    body.movie_id = parseInt(id);
+  } else {
+    body.series_id = parseInt(id);
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/watchlist/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message);
+    alert("Added to watchlist successfully!");
+  } catch (err) {
+    alert("Failed to add to watchlist: " + err.message);
+  }
+};
+
 
 
 

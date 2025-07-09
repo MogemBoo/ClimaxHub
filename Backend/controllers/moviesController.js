@@ -12,7 +12,7 @@ export async function addFullMovie(req, res) {
   try {
     await client.query('BEGIN');
 
-    // Insert movie
+    // insrrt movie
     const movieResult = await client.query(`
       INSERT INTO movie (title, release_date, duration, description, rating, vote_count, poster_url, trailer_url)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING movie_id
@@ -20,7 +20,7 @@ export async function addFullMovie(req, res) {
 
     const movieId = movieResult.rows[0].movie_id;
 
-    // Insert genres
+    // Incert genres
     for (const genreName of genres || []) {
       let genreRes = await client.query(`SELECT genre_id FROM genre WHERE name=$1`, [genreName]);
       let genreId;
