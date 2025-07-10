@@ -3,6 +3,37 @@ import { useParams, useLocation } from 'react-router-dom';
 import { FaStar } from 'react-icons/fa';
 import './Details.css';
 
+const CommentCard = ({ review }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const isLongComment = review.comments && review.comments.length > 150;
+
+  return (
+    <div className="comment-card">
+      <h4 className="comment-username">👤 {review.username}</h4>
+      <p className="comment-rating">⭐ {review.rating}/10</p>
+
+      <p className={`comment-text ${expanded ? "expanded" : ""}`} title={expanded ? "" : review.comments}>
+        "{review.comments}"
+      </p>
+
+      {isLongComment && (
+        <button
+          className="see-more-btn"
+          onClick={() => setExpanded(!expanded)}
+          type="button"
+        >
+          {expanded ? "See less" : "See more"}
+        </button>
+      )}
+
+      <p className="comment-date">
+        {new Date(review.created_at).toLocaleDateString('en-US')}
+      </p>
+    </div>
+  );
+};
+
 const Details = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -13,14 +44,22 @@ const Details = () => {
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  useEffect(() => {
+  const fetchDetails = async () => {
     const isSeries = location.pathname.includes('/series/');
+    const typeValue = isSeries ? 'series' : 'movies';
     setType(isSeries ? 'series' : 'movie');
 
-    fetch(`http://localhost:5000/api/${isSeries ? 'series' : 'movies'}/${id}`)
-      .then(res => res.json())
-      .then(setData)
-      .catch(() => {});
+    try {
+      const res = await fetch(`http://localhost:5000/api/${typeValue}/${id}`);
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      console.error("Failed to fetch data");
+    }
+  };
+
+  useEffect(() => {
+    fetchDetails();
   }, [id, location]);
 
   const fetchUserRating = async () => {
@@ -38,13 +77,8 @@ const Details = () => {
       }
 
       const data = await res.json();
-      if (data.rating) {
-        setUserRating(data.rating);
-        setComment(data.comments || "");
-      } else {
-        setUserRating(0);
-        setComment("");
-      }
+      setUserRating(data.rating || 0);
+      setComment(data.comments || "");
     } catch (err) {
       setUserRating(0);
     }
@@ -110,7 +144,13 @@ const Details = () => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+
       alert("Rating and comment submitted successfully!");
+      setShowRatingCard(false);
+      setHoverRating(0);
+      setComment("");
+      // setUserRating(0); // Uncomment if you want to clear selected rating
+      fetchDetails(); // Reload reviews
     } catch (err) {
       alert("Failed to submit rating: " + err.message);
     }
@@ -172,43 +212,42 @@ const Details = () => {
       <div className="background-blur" style={{ backgroundImage: `url(${data.poster_url})` }}></div>
 
       <div className="content row-layout">
-  <div className="left-col">
-    <img className="poster-large" src={data.poster_url} alt={data.title} />
-    <div className="info-under-poster">
-      <h1>{data.title}</h1>
-      <p className="sub">
-        {new Date(type === 'movie' ? data.release_date : data.start_date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
-        {data.duration ? ` • ${data.duration} min` : ''}
-        {data.rating ? ` • ⭐ ${data.rating}` : ''}
-      </p>
-      <p className="desc">{data.description}</p>
-      <div className="tags">
-        {(data.genres || []).map((g, i) => (
-          <span className="tag" key={i}>{g}</span>
-        ))}
-      </div>
-    </div>
-  </div>
+        <div className="left-col">
+          <img className="poster-large" src={data.poster_url} alt={data.title} />
+          <div className="info-under-poster">
+            <h1>{data.title}</h1>
+            <p className="sub">
+              {new Date(type === 'movie' ? data.release_date : data.start_date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+              {data.duration ? ` • ${data.duration} min` : ''}
+              {data.rating ? ` • ⭐ ${data.rating}` : ''}
+            </p>
+            <p className="desc">{data.description}</p>
+            <div className="tags">
+              {(data.genres || []).map((g, i) => (
+                <span className="tag" key={i}>{g}</span>
+              ))}
+            </div>
+          </div>
+        </div>
 
-  {data.trailer_url && (
-    <div className="right-section">
-      <div className="trailer-container">
-        <iframe
-          src={data.trailer_url.replace("watch?v=", "embed/")}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="Trailer"
-        ></iframe>
+        {data.trailer_url && (
+          <div className="right-section">
+            <div className="trailer-container">
+              <iframe
+                src={data.trailer_url.replace("watch?v=", "embed/")}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="Trailer"
+              ></iframe>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  )}
-</div>
-
 
       <div className="extras">
         <h2 className="section-title">{type} Cast</h2>
@@ -240,6 +279,17 @@ const Details = () => {
             </div>
           ))}
         </div>
+
+        <h2 className="section-title">User Comments</h2>
+        {(data.reviews || []).length > 0 ? (
+          <div className="comment-scroll-container">
+            {data.reviews.map((review) => (
+              <CommentCard key={review.review_id} review={review} />
+            ))}
+          </div>
+        ) : (
+          <p style={{ color: "#aaa", paddingLeft: "1rem" }}>No comments yet. Be the first to review!</p>
+        )}
       </div>
     </div>
   );
