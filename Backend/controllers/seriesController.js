@@ -108,7 +108,7 @@ export async function getSeriesById(req, res) {
 
   try {
     const seriesResult = await pool.query(`
-      SELECT series_id, title, start_date, end_date, description, rating, vote_count, poster_url, trailer_url
+      SELECT series_id, title, start_date, end_date, description, ROUND(rating::numeric,1) AS rating, vote_count, poster_url, trailer_url
       FROM series
       WHERE series_id = $1
     `, [seriesId]);
@@ -158,7 +158,7 @@ export async function getSeriesById(req, res) {
     }
 
     const reviewsResult = await pool.query(`
-  SELECT r.review_id, r.rating, r.comments, r.created_at, p.username AS reviewer_name
+  SELECT r.review_id, ROUND(r.rating::numeric,1) AS rating, r.comments, r.created_at, p.username AS reviewer_name
   FROM series_review r
   JOIN users p ON r.user_id = p.user_id
   WHERE r.series_id = $1
@@ -185,7 +185,7 @@ export async function getSeriesById(req, res) {
 export async function getTopRatedSeries(req, res) {
   try {
     const result = await pool.query(`
-      SELECT series_id, title, rating, vote_count, poster_url, description
+      SELECT series_id, title, ROUND(rating::numeric,1) AS rating, vote_count, poster_url, description
       FROM series
       WHERE rating IS NOT NULL
       ORDER BY rating DESC, vote_count DESC
@@ -206,7 +206,7 @@ export async function searchSeries(req, res) {
 
   try {
     const result = await pool.query(`
-      SELECT series_id, title, rating, start_date, poster_url
+      SELECT series_id, title, ROUND(rating::numeric,1) AS rating, start_date, poster_url
       FROM series
       WHERE LOWER(title) LIKE LOWER($1)
       ORDER BY start_date DESC
@@ -225,7 +225,7 @@ export async function searchSeries(req, res) {
 export async function getRecentSeries(req, res) {
   try {
     const result = await pool.query(`
-      SELECT series_id, title, start_date, rating, poster_url
+      SELECT series_id, title, start_date, ROUND(rating::numeric,1) AS rating, poster_url
       FROM series
       ORDER BY start_date DESC
       LIMIT 10
@@ -242,7 +242,7 @@ export async function getRecentSeries(req, res) {
 export async function getAllSeries(req, res) {
   try {
     const result = await pool.query(`
-      SELECT series_id, title, start_date, rating, poster_url
+      SELECT series_id, title, start_date, ROUND(rating::numeric,1) AS rating, poster_url
       FROM series
       ORDER BY title DESC
     `);

@@ -92,7 +92,7 @@ export async function getMovieById(req, res) {
 
   try {
     const movieResult = await pool.query(`
-      SELECT movie_id, title, release_date, duration, description, rating, vote_count, poster_url, trailer_url
+      SELECT movie_id, title, release_date, duration, description, ROUND(rating::numeric,1) AS rating, vote_count, poster_url, trailer_url
       FROM movie
       WHERE movie_id = $1
     `, [movieId]);
@@ -124,7 +124,7 @@ export async function getMovieById(req, res) {
     `, [movieId]);
 
     const reviewsResult = await pool.query(`
-      SELECT mr.review_id, mr.user_id, u.username, mr.rating, mr.comments, mr.created_at
+      SELECT mr.review_id, mr.user_id, u.username, ROUND(mr.rating::numeric,1) AS rating, mr.comments, mr.created_at
       FROM movie_review mr
       JOIN users u ON mr.user_id = u.user_id
       WHERE mr.movie_id = $1
@@ -148,7 +148,7 @@ export async function getMovieById(req, res) {
 export async function getTopRatedMovies(req, res) {
   try {
     const result = await pool.query(`
-      SELECT movie_id, title, rating, vote_count, poster_url, description
+      SELECT movie_id, title, ROUND(rating::numeric,1) AS rating, vote_count, poster_url, description
       FROM movie
       WHERE rating IS NOT NULL
       ORDER BY rating DESC, vote_count DESC
@@ -169,7 +169,7 @@ export async function searchMovies(req, res) {
 
   try {
     const result = await pool.query(`
-      SELECT movie_id, title, rating, release_date, poster_url
+      SELECT movie_id, title, ROUND(rating::numeric,1) AS rating, release_date, poster_url
       FROM movie
       WHERE LOWER(title) LIKE LOWER($1)
       ORDER BY release_date DESC
@@ -187,7 +187,7 @@ export async function searchMovies(req, res) {
 export async function getRecentMovies(req, res) {
   try {
     const result = await pool.query(`
-      SELECT movie_id, title, release_date, rating, poster_url
+      SELECT movie_id, title, release_date, ROUND(rating::numeric,1) AS rating, poster_url
       FROM movie
       ORDER BY release_date DESC
       LIMIT 20
@@ -204,7 +204,7 @@ export async function getRecentMovies(req, res) {
 export async function getAllMovies(req, res) {
   try {
     const result = await pool.query(`
-      SELECT movie_id, title, release_date, rating, poster_url, description
+      SELECT movie_id, title, release_date, ROUND(rating::numeric,1) AS rating, poster_url, description
       FROM movie
       ORDER BY title DESC
     `);

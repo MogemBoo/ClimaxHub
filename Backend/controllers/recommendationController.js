@@ -12,7 +12,7 @@ export const getUserRecommendations = async (req, res) => {
      rm.recommended_movie_id,
      m.title,
      m.poster_url,
-     m.rating,
+     ROUND(m.rating::numeric,1) AS rating,
      m.release_date
    FROM recommendation_movie rm
    JOIN movie m ON rm.recommended_movie_id = m.movie_id
@@ -29,7 +29,7 @@ export const getUserRecommendations = async (req, res) => {
          rs.recommended_series_id,
          s.title,
          s.poster_url,
-         s.rating,
+         ROUND(s.rating::numeric,1) AS rating,
          s.start_date
        FROM recommendation_series rs
        JOIN series s ON rs.recommended_series_id = s.series_id
