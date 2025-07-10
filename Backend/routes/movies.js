@@ -5,7 +5,8 @@ import {
     getTopRatedMovies,
     searchMovies,
     getAllMovies,
-    getMovieById
+    getMovieById,
+    getPerStarUserCount
 } from '../controllers/moviesController.js';
 
 const router = express.Router();
@@ -16,5 +17,5 @@ router.get('/recent', getRecentMovies);
 router.get('/search', searchMovies);
 router.get('/all', getAllMovies);
 router.get('/:id', getMovieById);
-
+router.get(':id/per-star-user-count', getPerStarUserCount);
 export default router;

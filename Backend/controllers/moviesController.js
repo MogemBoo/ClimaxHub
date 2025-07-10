@@ -215,3 +215,27 @@ export async function getAllMovies(req, res) {
     res.status(500).json({ error: 'Failed to fetch all movies' });
   }
 }
+
+// per star user count
+export const getPerStarUserCount = async (req, res) => {
+  const { id } = req.params;
+
+  const movie_id = parseInt(id);
+  if (isNaN(movie_id)) {
+    return res.status(400).json({ error: 'Invalid movie ID' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT rating, COUNT(DISTINCT user_id) AS count
+      FROM movie_review
+      WHERE movie_id = $1
+      GROUP BY rating
+      ORDER BY rating ASC
+    `, [movie_id]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error while fetching per star user count:', error);
+    res.status(500).json({ error: 'Failed to fetch per star user count' });
+  }
+}

@@ -6,8 +6,8 @@ import {
     getTopRatedSeries,
     searchSeries,
     getSeriesById,
-    getSeriesEpisodes
-
+    getSeriesEpisodes,
+    getPerStarUserCount
 } from '../controllers/seriesController.js';
 
 const router = express.Router();
@@ -19,5 +19,6 @@ router.get('/search', searchSeries);
 router.get('/all', getAllSeries);
 router.get('/:id', getSeriesById);
 router.get('/:id/episodes', getSeriesEpisodes);
+router.get('/per-star-user-count', getPerStarUserCount);
 
 export default router;

@@ -292,3 +292,27 @@ export async function getSeriesEpisodes(req, res) {
     res.status(500).json({ error: 'Failed to fetch episodes' });
   }
 }
+
+// per star user count
+export const getPerStarUserCount = async (req, res) => {
+  const { id } = req.params;
+
+  const series_id = parseInt(id);
+  if (isNaN(series_id)) {
+    return res.status(400).json({ error: 'Invalid series ID' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT rating, COUNT(DISTINCT user_id) AS count
+      FROM series_review
+      WHERE series_id = $1
+      GROUP BY rating
+      ORDER BY rating ASC
+    `, [series_id]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error while fetching per star user count:', error);
+    res.status(500).json({ error: 'Failed to fetch per star user count' });
+  }
+}
